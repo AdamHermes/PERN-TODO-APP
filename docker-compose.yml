@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: AdamBach662005
+      POSTGRES_DB: perntodo
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./server/database.sql:/docker-entrypoint-initdb.d/database.sql
+
+  backend:
+    container_name: backend
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgres://postgres:AdamBach662005@database:5432/perntodo
+    ports:
+      - 5000:5000
+    depends_on:
+      - database
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_OPTIONS=--openssl-legacy-provider
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
